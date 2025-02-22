@@ -1,55 +1,50 @@
 import { useContext, useState } from "react";
-import { FaEnvelope, FaGoogle, FaLock } from "react-icons/fa";
-import { AuthContext } from "../../Components/Authentication/AuthProvider";
+import { FaEnvelope, FaLock } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+
+import Swal from "sweetalert2";
 import axios from "axios";
+import { AuthContext } from "../../Components/Authentication/AuthProvider";
 
-const Login = () => {
-  const { handelSignin, googleSign } = useContext(AuthContext);
+const SignUp = () => {
+  const { createUser } = useContext(AuthContext); // Assuming a signup function exists
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handelgoogle = () => {
-    googleSign()
-      .then((user2) => {
-        Toast.fire({
-          icon: "success",
-          title: `Welcome ${user2.user.displayName}`
-        });
+  // ✅ Define Toast for SweetAlert2
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 1000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
 
-        const newUser = { name: user2.user.displayName, email: user2.user.email };
-
-        axios
-          .post("https://todo-react-js-server.onrender.com/users", newUser)
-          .then(() => console.log("Google User stored successfully"))
-          .catch((err) => console.error("Error storing Google user:", err));
-      })
-      .catch((error) => {
-        Toast.fire({
-          icon: "error",
-          title: error.code
-        });
-        console.log(error);
-      });
-  };
-
-  const handleLogin = (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
     const form = e.target;
     const email = form.email.value;
     const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
 
-    handelSignin(email, password)
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    createUser(email, password)
       .then((result) => {
-        console.log("User Logged In:", result.user);
-        
-        // **Logged in user MongoDB তে স্টোর করবো**
-        const loggedInUser = { email: result.user.email };
-
-        axios
-          .post("https://todo-react-js-server.onrender.com/users", loggedInUser)
-          .then(() => console.log("Logged In User stored successfully"))
-          .catch((err) => console.error("Error storing logged in user:", err));
-
+        console.log("User Signed Up:", result.user);
         form.reset();
+        navigate('/alltask');
+        axios
+          .post("https://todo-react-js-server.onrender.com/users", newUser)
+          .then(() => console.log("User stored successfully"))
+          .catch((err) => console.error("Error storing user:", err));
       })
       .catch((error) => {
         console.error("Error:", error.message);
@@ -60,8 +55,8 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full">
-        <h2 className="text-3xl font-semibold text-center mb-8">Login</h2>
-        <form onSubmit={handleLogin} className="space-y-6">
+        <h2 className="text-3xl font-semibold text-center mb-8">Sign Up</h2>
+        <form onSubmit={handleSignup} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
             <div className="flex items-center border rounded-lg p-2">
@@ -90,30 +85,34 @@ const Login = () => {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium mb-2">Confirm Password</label>
+            <div className="flex items-center border rounded-lg p-2">
+              <FaLock className="text-gray-500 mr-2" />
+              <input
+                type="password"
+                name="confirmPassword"
+                required
+                placeholder="Confirm your password"
+                className="flex-1 outline-none"
+              />
+            </div>
+          </div>
+
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-500 transition duration-300"
           >
-            Login
+            Sign Up
           </button>
-          <div className="items-center justify-center text-center">
-            <div className="flex items-center justify-between">
-              <hr className="w-1/6" />
-              <p>Login with social accounts</p>
-              <hr className="w-1/6" />
-            </div>
-            <button onClick={handelgoogle}>
-              <FaGoogle />
-            </button>
-          </div>
 
           <p className="text-center text-sm text-gray-600 mt-4">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:underline">
-              Sign Up
-            </a>
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              Login
+            </Link>
           </p>
         </form>
       </div>
@@ -121,4 +120,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;

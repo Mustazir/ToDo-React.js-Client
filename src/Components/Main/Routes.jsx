@@ -6,16 +6,28 @@ import IncompleteTask from "./../../Pages/Tasks page/IncompleteTask";
 import ImportentTask from './../../Pages/Tasks page/ImportentTask';
 import CompleteTask from "../../Pages/Tasks page/CompleteTask";
 
-import SignUP from "../../Pages/Log/SignUP";
+
 import Login from "../../Pages/Log/Login";
-CompleteTask
+import SignUp from "../../Pages/Log/SignUP";
+import UserPrivate from "../Authentication/UserPrivate";
+import InProgress from "../../Pages/Tasks page/InProgress";
+
 export const router = createBrowserRouter([
   {
+    path:'/login',
+    element:<Login></Login>
+  },
+  {
+    path:'/signUp',
+    element:<SignUp></SignUp>
+  },
+  
+  {
     path: "/",
-    element: <Root></Root>,
+    element: <UserPrivate><Root></Root></UserPrivate>,
     children: [
       {
-        path: "/",
+        path: "/alltask",
         element: <AllTask></AllTask>,
       },
       {
@@ -30,11 +42,15 @@ export const router = createBrowserRouter([
         path: "/importenttask",
         element: <ImportentTask></ImportentTask>,
       },
+      {
+        path: "/inProgress",
+        element: <InProgress></InProgress>
+      },
     ],
   },
   {
     path:'/signUp',
-    element :<SignUP></SignUP>
+    element :<SignUp></SignUp>
   }
   ,
   {

@@ -22,13 +22,13 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
     queryFn: fetchTasks,
   });
 
-  // Mutations for updating tasks
+  // Mutations
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       await axios.put(`https://todo-react-js-server.onrender.com/tasks/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["tasks"]); // Refresh tasks after update
+      queryClient.invalidateQueries(["tasks"]);
     },
   });
 
@@ -41,7 +41,7 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
     },
   });
 
-  // Filter tasks dynamically
+  // Filtering logic
   let displayedTasks = tasks;
   if (filterStatus) {
     displayedTasks = displayedTasks.filter((task) => task.status === filterStatus);
@@ -55,107 +55,102 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-4 p-4">
-      {displayedTasks.map((item, i) => (
-        <div key={i} className="border p-4 flex flex-col justify-between gap-3 rounded-2xl">
-          {editingTask === item._id ? (
-            <div>
-              <input
-                type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="border p-1 rounded w-full"
-              />
-              <textarea
-                value={editedDescription}
-                onChange={(e) => setEditedDescription(e.target.value)}
-                className="border p-1 rounded w-full mt-2"
-              ></textarea>
+    <div className="flex flex-col mx-auto flex-grow">
+      {/* Task Grid */}
+      <div className="grid lg:grid-cols-3  md:grid-cols-2 gap-4 p-6 flex-grow">
+        {displayedTasks.map((item, i) => (
+          <div key={i} className="border p-4 flex flex-col w-80 h-80 justify-between gap-3 rounded-2xl">
+            {editingTask === item._id ? (
+              <div>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="border p-1 rounded w-full"
+                />
+                <textarea
+                  maxlength="250"
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  className="border p-1 rounded w-full mt-2"
+                ></textarea>
+                <button
+                  onClick={() => {
+                    updateTaskMutation.mutate({
+                      id: item._id,
+                      data: { title: editedTitle, description: editedDescription },
+                    });
+                    setEditingTask(null);
+                  }}
+                  className="cursor-pointer bg-blue-500 text-white p-1 mt-2 rounded w-full"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </>
+            )}
+
+            <div className="flex items-center justify-between">
+              {/* Task Status Button */}
               <button
                 onClick={() => {
-                  updateTaskMutation.mutate({
-                    id: item._id,
-                    data: { title: editedTitle, description: editedDescription },
-                  });
-                  setEditingTask(null);
+                  const newStatus =
+                    item.status === "Incomplete"
+                      ? "In Progress"
+                      : item.status === "In Progress"
+                      ? "Completed"
+                      : "Incomplete";
+                  updateTaskMutation.mutate({ id: item._id, data: { status: newStatus } });
                 }}
-                className="bg-blue-500 text-white p-1 mt-2 rounded w-full"
-              >
-                Save
-              </button>
-            </div>
-          ) : (
-            <>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </>
-          )}
-
-          <div className="flex items-center justify-between">
-            {/* Task Status Button */}
-            <button
-              onClick={() => {
-                const newStatus =
+                className={`cursor-pointer p-2 rounded-2xl w-2/6 text-white ${
                   item.status === "Incomplete"
-                    ? "In Progress"
+                    ? "bg-gray-500"
                     : item.status === "In Progress"
-                    ? "Completed"
-                    : "Incomplete";
-                updateTaskMutation.mutate({ id: item._id, data: { status: newStatus } });
-              }}
-              className={`p-2 rounded-2xl w-2/6 text-white ${
-                item.status === "Incomplete"
-                  ? "bg-gray-500"
-                  : item.status === "In Progress"
-                  ? "bg-yellow-500"
-                  : "bg-green-800"
-              }`}
-            >
-              {item.status}
-            </button>
-
-            <div className="flex w-4/6 justify-evenly text-2xl">
-              {/* Important Button */}
-              <button
-                onClick={() => {
-                  updateTaskMutation.mutate({
-                    id: item._id,
-                    data: { important: !item.important },
-                  });
-                }}
-                className={item.important ? "text-red-500" : "text-gray-500"}
+                    ? "bg-yellow-500"
+                    : "bg-green-800"
+                }`}
               >
-                <CiHeart />
+                {item.status}
               </button>
 
-              {/* Edit Button */}
-              <button
-                onClick={() => {
-                  setEditingTask(item._id);
-                  setEditedTitle(item.title);
-                  setEditedDescription(item.description);
-                }}
-              >
-                <FaEdit />
-              </button>
+              <div className="flex w-4/6 justify-evenly text-2xl">
+                {/* Important Button */}
+                <button
+                  onClick={() => {
+                    updateTaskMutation.mutate({
+                      id: item._id,
+                      data: { important: !item.important },
+                    });
+                  }}
+                  className={item.important ? "text-red-500" : "text-gray-500"}
+                >
+                  <CiHeart className="cursor-pointer" />
+                </button>
 
-              {/* Delete Button */}
-              <button onClick={() => deleteTaskMutation.mutate(item._id)}>
-                <MdDeleteOutline />
-              </button>
+                {/* Edit Button */}
+                <button
+                  onClick={() => {
+                    setEditingTask(item._id);
+                    setEditedTitle(item.title);
+                    setEditedDescription(item.description);
+                  }}
+                >
+                  <FaEdit className="cursor-pointer" />
+                </button>
+
+                {/* Delete Button */}
+                <button onClick={() => deleteTaskMutation.mutate(item._id)}>
+                  <MdDeleteOutline className="cursor-pointer" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-
-      {home === "true" && (
-        <button
-          onClick={() => setInputDiv("fixed")}
-          className="border p-4 flex flex-col items-center gap-3 rounded-2xl justify-center"
-        >
-          <h3>Add More</h3>
-        </button>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

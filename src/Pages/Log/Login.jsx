@@ -18,7 +18,7 @@ const Login = () => {
         const newUser = { name: user2.user.displayName, email: user2.user.email };
 
         axios
-          .post("http://localhost:5000/users", newUser)
+          .post("https://todo-react-js-server.onrender.com/users", newUser)
           .then(() => console.log("User stored successfully"))
           .catch((err) => console.error("Error storing user:", err));
       })

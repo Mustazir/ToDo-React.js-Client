@@ -10,7 +10,7 @@ const InputData = ({ inputDiv, setInputDiv }) => {
 
   const addTaskMutation = useMutation({
     mutationFn: async (newTask) =>
-      axios.post("http://localhost:5000/tasks", newTask),
+      axios.post("https://todo-react-js-server.onrender.com/tasks", newTask),
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks"]);
       setTitle("");

@@ -6,7 +6,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import axios from "axios";
 
 const fetchTasks = async () => {
-  const response = await axios.get("http://localhost:5000/tasks");
+  const response = await axios.get("https://todo-react-js-server.onrender.com/tasks");
   return response.data;
 };
 
@@ -25,7 +25,7 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
   // Mutations for updating tasks
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      await axios.put(`http://localhost:5000/tasks/${id}`, data);
+      await axios.put(`https://todo-react-js-server.onrender.com/tasks/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks"]); // Refresh tasks after update
@@ -34,7 +34,7 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (id) => {
-      await axios.delete(`http://localhost:5000/tasks/${id}`);
+      await axios.delete(`https://todo-react-js-server.onrender.com/tasks/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks"]);

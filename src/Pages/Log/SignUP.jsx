@@ -18,7 +18,7 @@ const Login = () => {
         const newUser = { name: user2.user.displayName, email: user2.user.email };
 
         axios
-          .post("http://localhost:5000/users", newUser)
+          .post("https://todo-react-js-server.onrender.com/users", newUser)
           .then(() => console.log("Google User stored successfully"))
           .catch((err) => console.error("Error storing Google user:", err));
       })
@@ -45,7 +45,7 @@ const Login = () => {
         const loggedInUser = { email: result.user.email };
 
         axios
-          .post("http://localhost:5000/users", loggedInUser)
+          .post("https://todo-react-js-server.onrender.com/users", loggedInUser)
           .then(() => console.log("Logged In User stored successfully"))
           .catch((err) => console.error("Error storing logged in user:", err));
 

@@ -1,5 +1,8 @@
 # To-Do Website
 
+![Banner](/Screenshot_21.png)
+
+
 ## Short Description
 This is a To-Do website where users can save their tasks, view tasks in progress, and mark them as complete. User authentication is required to access the platform.
 

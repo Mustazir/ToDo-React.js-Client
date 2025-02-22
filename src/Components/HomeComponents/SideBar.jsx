@@ -1,23 +1,28 @@
 import React from "react";
 import { CgNotes } from "react-icons/cg";
+import { Link } from "react-router-dom";
 const SideBar = () => {
   const data = [
     {
       title: "All Task",
-      icon:<CgNotes />
+      icon:<CgNotes />,
+      link : '/'
 
     },
     {
       title: "Important Task",
-      icon:<CgNotes />
+      icon:<CgNotes />,
+      link : '/importenttask'
     },
     {
       title: "Completed Task",
-      icon:<CgNotes />
+      icon:<CgNotes />,
+      link : '/completedtask'
     },
     {
       title: "Incompleted Task",
-      icon:<CgNotes />
+      icon:<CgNotes />,
+      link : '/incompletedtask'
     },
   ];
   return (
@@ -29,7 +34,7 @@ const SideBar = () => {
       </div>
       <div>
         {data.map((item, i) => (
-          <div className="flex items-center gap-2 my-2">{item.icon}{item.title}</div>
+          <Link to={item.link} key={i} className="flex items-center gap-2 my-2 hover:bg-gray-500">{item.icon}{item.title}</Link>
         ))}
       </div>
       <div>

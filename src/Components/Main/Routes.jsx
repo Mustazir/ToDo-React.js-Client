@@ -11,6 +11,7 @@ import Login from "../../Pages/Log/Login";
 import SignUp from "../../Pages/Log/SignUP";
 import UserPrivate from "../Authentication/UserPrivate";
 import InProgress from "../../Pages/Tasks page/InProgress";
+import AllAllTask from "../../Pages/Tasks page/AllAllTask";
 
 export const router = createBrowserRouter([
   {
@@ -28,8 +29,12 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/alltask",
-        element: <AllTask></AllTask>,
+        element: <AllAllTask></AllAllTask>
       },
+      // {
+      //   path: "/alltask",
+      //   element: <AllTask></AllTask>,
+      // },
       {
         path: "/incompletedtask",
         element: <IncompleteTask></IncompleteTask>,

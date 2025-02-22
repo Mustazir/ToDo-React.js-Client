@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CiHeart } from "react-icons/ci";
 import { FaEdit } from "react-icons/fa";
@@ -6,26 +6,95 @@ import { MdDeleteOutline } from "react-icons/md";
 import axios from "axios";
 
 const fetchTasks = async () => {
-  const response = await axios.get("https://todo-react-js-server.onrender.com/tasks");
+  const response = await axios.get(
+    "https://todo-react-js-server.onrender.com/tasks"
+  );
   return response.data;
 };
 
-const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
-  const queryClient = useQueryClient();
-  const [editingTask, setEditingTask] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [editedDescription, setEditedDescription] = useState("");
+const Modal = ({ isOpen, onClose, title, description, onSave, isEditing }) => {
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [editedDescription, setEditedDescription] = useState(description);
 
-  // Fetch Tasks
+  // Sync state with props whenever the modal opens or the props change
+  useEffect(() => {
+    if (isOpen) {
+      setEditedTitle(title);
+      setEditedDescription(description);
+    }
+  }, [isOpen, title, description]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-800/70 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-2xl items-center flex justify-center w-2/5 mx-auto h-3/4 my-auto">
+        <div className="bg-white text-black p-6 rounded-lg w-96 shadow-lg">
+          {isEditing ? (
+            <>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="border p-1 rounded w-full mb-4"
+                placeholder="Title"
+              />
+              <textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                className="border p-1 rounded w-full mb-4"
+                placeholder="Description"
+                maxLength="250"
+              ></textarea>
+              <button
+                onClick={() => {
+                  onSave(editedTitle, editedDescription);
+                  onClose();
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+              >
+                Save
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold mb-4">{title}</h2>
+              <p className="mb-6">{description}</p>
+            </>
+          )}
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white px-4 py-2 rounded w-full"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Card = ({ filterStatus, filterImportant }) => {
+  const queryClient = useQueryClient();
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    taskId: null,
+    isEditing: false,
+  });
+
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
   });
 
-  // Mutations
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      await axios.put(`https://todo-react-js-server.onrender.com/tasks/${id}`, data);
+      await axios.put(
+        `https://todo-react-js-server.onrender.com/tasks/${id}`,
+        data
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks"]);
@@ -34,17 +103,20 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (id) => {
-      await axios.delete(`https://todo-react-js-server.onrender.com/tasks/${id}`);
+      await axios.delete(
+        `https://todo-react-js-server.onrender.com/tasks/${id}`
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks"]);
     },
   });
 
-  // Filtering logic
   let displayedTasks = tasks;
   if (filterStatus) {
-    displayedTasks = displayedTasks.filter((task) => task.status === filterStatus);
+    displayedTasks = displayedTasks.filter(
+      (task) => task.status === filterStatus
+    );
   }
   if (filterImportant) {
     displayedTasks = displayedTasks.filter((task) => task.important);
@@ -56,46 +128,41 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
 
   return (
     <div className="flex flex-col mx-auto flex-grow">
-      {/* Task Grid */}
-      <div className="grid lg:grid-cols-3  md:grid-cols-2 gap-4 p-6 flex-grow">
-        {displayedTasks.map((item, i) => (
-          <div key={i} className="border p-4 flex flex-col w-80 h-80 justify-between gap-3 rounded-2xl">
-            {editingTask === item._id ? (
-              <div>
-                <input
-                  type="text"
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  className="border p-1 rounded w-full"
-                />
-                <textarea
-                  maxlength="250"
-                  value={editedDescription}
-                  onChange={(e) => setEditedDescription(e.target.value)}
-                  className="border p-1 rounded w-full mt-2"
-                ></textarea>
-                <button
-                  onClick={() => {
-                    updateTaskMutation.mutate({
-                      id: item._id,
-                      data: { title: editedTitle, description: editedDescription },
-                    });
-                    setEditingTask(null);
-                  }}
-                  className="cursor-pointer bg-blue-500 text-white p-1 mt-2 rounded w-full"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </>
-            )}
+      <div className="flex flex-col gap-4 p-6 flex-grow">
+        {displayedTasks.map((item) => (
+          <div
+            key={item._id}
+            className="border p-4 flex flex-col w-80 h-48 gap-3 rounded-2xl"
+          >
+            <h3>{item.title}</h3>
+            <div className="flex justify-between">
+              <p>
+                Date: {new Date(item.createdAt).toISOString().split("T")[0]}
+              </p>
+              <p>
+                Time:{" "}
+                {new Date(item.createdAt)
+                  .toTimeString()
+                  .split(" ")[0]
+                  .slice(0, 5)}
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                setModalData({
+                  isOpen: true,
+                  title: item.title,
+                  description: item.description,
+                  taskId: null,
+                  isEditing: false,
+                })
+              }
+              className="cursor-pointer bg-blue-500 text-white p-1 rounded w-full"
+            >
+              Details
+            </button>
 
-            <div className="flex items-center justify-between">
-              {/* Task Status Button */}
+            <div className="flex items-center justify-between bg-">
               <button
                 onClick={() => {
                   const newStatus =
@@ -104,7 +171,10 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
                       : item.status === "In Progress"
                       ? "Completed"
                       : "Incomplete";
-                  updateTaskMutation.mutate({ id: item._id, data: { status: newStatus } });
+                  updateTaskMutation.mutate({
+                    id: item._id,
+                    data: { status: newStatus },
+                  });
                 }}
                 className={`cursor-pointer p-2 rounded-2xl w-2/6 text-white ${
                   item.status === "Incomplete"
@@ -118,7 +188,6 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
               </button>
 
               <div className="flex w-4/6 justify-evenly text-2xl">
-                {/* Important Button */}
                 <button
                   onClick={() => {
                     updateTaskMutation.mutate({
@@ -131,18 +200,20 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
                   <CiHeart className="cursor-pointer" />
                 </button>
 
-                {/* Edit Button */}
                 <button
-                  onClick={() => {
-                    setEditingTask(item._id);
-                    setEditedTitle(item.title);
-                    setEditedDescription(item.description);
-                  }}
+                  onClick={() =>
+                    setModalData({
+                      isOpen: true,
+                      title: item.title,
+                      description: item.description,
+                      taskId: item._id,
+                      isEditing: true,
+                    })
+                  }
                 >
                   <FaEdit className="cursor-pointer" />
                 </button>
 
-                {/* Delete Button */}
                 <button onClick={() => deleteTaskMutation.mutate(item._id)}>
                   <MdDeleteOutline className="cursor-pointer" />
                 </button>
@@ -151,6 +222,30 @@ const Card = ({ home, setInputDiv, filterStatus, filterImportant }) => {
           </div>
         ))}
       </div>
+
+      <Modal
+        isOpen={modalData.isOpen}
+        onClose={() =>
+          setModalData({
+            isOpen: false,
+            title: "",
+            description: "",
+            taskId: null,
+            isEditing: false,
+          })
+        }
+        title={modalData.title}
+        description={modalData.description}
+        isEditing={modalData.isEditing}
+        onSave={(editedTitle, editedDescription) => {
+          if (modalData.taskId) {
+            updateTaskMutation.mutate({
+              id: modalData.taskId,
+              data: { title: editedTitle, description: editedDescription },
+            });
+          }
+        }}
+      />
     </div>
   );
 };

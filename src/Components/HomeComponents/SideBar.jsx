@@ -79,7 +79,7 @@ const SideBar = () => {
         ) : user ? (
           <div className="flex w-[247px] py-6 gap-4">
             <div>
-              <h1>{user.displayName || "No Name"}</h1>
+              
               <h1>{user.email || "No Email"}</h1>
             </div>
           </div>

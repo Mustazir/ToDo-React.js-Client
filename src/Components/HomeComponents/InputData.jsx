@@ -1,37 +1,30 @@
 import React, { useState } from "react";
 import { IoIosClose } from "react-icons/io";
-import axios from "axios"; // Import axios
+import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const InputData = ({ inputDiv, setInputDiv }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const queryClient = useQueryClient();
 
-  // Function to handle form submission
-  const handleSubmit = async () => {
+  const addTaskMutation = useMutation({
+    mutationFn: async (newTask) =>
+      axios.post("http://localhost:5000/tasks", newTask),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tasks"]);
+      setTitle("");
+      setDescription("");
+      setInputDiv("hidden");
+    },
+  });
+
+  const handleSubmit = () => {
     if (!title || !description) {
       alert("Please fill out both fields!");
       return;
     }
-
-    const newTask = { title, description, status: "incomplete" }; // Added status field
-
-    try {
-      const response = await axios.post("http://localhost:5000/tasks", newTask, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.status === 200) {
-        alert("Task added successfully!");
-        setTitle(""); // Reset title field
-        setDescription(""); // Reset description field
-        setInputDiv("hidden"); // Hide the modal
-      } else {
-        alert(`Error: ${response.data.message}`);
-      }
-    } catch (error) {
-      console.error("Error adding task:", error);
-      alert("Failed to add task. Please try again.");
-    }
+    addTaskMutation.mutate({ title, description, status: "Incomplete" });
   };
 
   return (
@@ -47,18 +40,14 @@ const InputData = ({ inputDiv, setInputDiv }) => {
           <input
             type="text"
             placeholder="Title"
-            name="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="px-3 py-2 rounded w-full bg-white text-black"
           />
           <textarea
-            name="description"
             placeholder="Enter the Description ..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            cols="30"
-            rows="5"
             className="bg-gray-500 w-full my-2 rounded p-4"
           ></textarea>
           <button onClick={handleSubmit} className="px-3 py-2 bg-blue-400 text-black text-2xl font-semibold">

@@ -30,6 +30,7 @@ const SignUp = () => {
     const email = form.email.value;
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
+    const displayName = form.displayName.value; // Getting the display name
 
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
@@ -40,11 +41,24 @@ const SignUp = () => {
       .then((result) => {
         console.log("User Signed Up:", result.user);
         form.reset();
-        navigate('/alltask');
+
+        // Collect user details, including display name
+        const userDetails = {
+          userId: result.user.uid,  // Firebase User ID
+          email: result.user.email,  // User's email
+          displayName: displayName || "New User",  // Use the input display name, or default to "New User"
+        };
+
+        // Send the details to the backend
         axios
-          .post("https://todo-react-js-server.onrender.com/users", newUser)
-          .then(() => console.log("User stored successfully"))
-          .catch((err) => console.error("Error storing user:", err));
+          .post("https://todo-react-js-server.onrender.com/users", userDetails)
+          .then(() => {
+            console.log("User stored successfully");
+            navigate('/alltask');
+          })
+          .catch((err) => {
+            console.error("Error storing user:", err);
+          });
       })
       .catch((error) => {
         console.error("Error:", error.message);
@@ -57,6 +71,19 @@ const SignUp = () => {
       <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full">
         <h2 className="text-3xl font-semibold text-center mb-8">Sign Up</h2>
         <form onSubmit={handleSignup} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Display Name</label>
+            <div className="flex items-center border rounded-lg p-2">
+              <input
+                type="text"
+                name="displayName"
+                required
+                placeholder="Enter your display name"
+                className="flex-1 outline-none"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
             <div className="flex items-center border rounded-lg p-2">

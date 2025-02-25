@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CgNotes } from "react-icons/cg";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../Authentication/AuthProvider";
@@ -6,9 +6,27 @@ import { MdLabelImportantOutline } from "react-icons/md";
 import { MdOutlineSmsFailed } from "react-icons/md";
 import { IoCheckmarkDone } from "react-icons/io5";
 import { GrInProgress } from "react-icons/gr";
+import axios from "axios"; // Make sure axios is imported
 
 const SideBar = () => {
   const { user, loading, logout } = useContext(AuthContext);
+  const [users, setUsers] = useState([]); // State to store users
+
+  // Fetch users data
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(
+          "https://todo-react-js-server.onrender.com/users"
+        );
+        setUsers(response.data); // Set users state
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []); // Empty dependency array ensures it runs once after component mounts
 
   const handelLogout = () => {
     logout()
@@ -52,8 +70,8 @@ const SideBar = () => {
   ];
 
   return (
-    <div className="h-screen sticky top-0 bg-color2 text-white hidden  lg:flex flex-col justify-between py-5 dark:bg-gray-950 dark:text-white">
-      <div className="flex flex-col px-3 ">
+    <div className="h-screen sticky top-0 bg-color2 text-white hidden lg:flex flex-col justify-between py-5 dark:bg-gray-950 dark:text-white">
+      <div className="flex flex-col px-3">
         <div className="divider"></div>
 
         <ul className="menu w-full text-white p-0 [&_li>*]:rounded-none">
@@ -78,8 +96,13 @@ const SideBar = () => {
           </div>
         ) : user ? (
           <div className="flex w-[247px] py-6 gap-4">
-            <div>
-              
+            <div className="flex flex-col">
+              <h1 className="">
+                {user.displayName ||
+                  users.find((u) => u.email === user.email)?.displayName ||
+                  "No Display Name"}
+              </h1>
+
               <h1>{user.email || "No Email"}</h1>
             </div>
           </div>

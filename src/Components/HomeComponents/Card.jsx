@@ -28,7 +28,7 @@ const Modal = ({ isOpen, onClose, title, description, onSave, isEditing }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-800/70 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-2xl items-center flex justify-center w-2/5 mx-auto h-3/4 my-auto">
+      <div className="bg-gray-800 rounded-2xl items-center flex justify-center lg:w-2/5 mx-auto lg:h-3/4 my-auto">
         <div className="bg-white text-black p-6 rounded-lg w-96 shadow-lg">
           {isEditing ? (
             <>

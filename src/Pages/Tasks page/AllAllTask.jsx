@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import CompleteTask from "./CompleteTask";
 import IncompleteTask from "./IncompleteTask";
 import ImportentTask from "./ImportentTask";
@@ -33,7 +32,7 @@ const AllAllTask = () => {
           </div>
         </div>
       </div>
-      <div className=" lg:flex gap-2 mx-auto">
+      <div className=" lg:flex gap-2 mx-auto lg:mt-5">
         <IncompleteTask></IncompleteTask>
         <InProgress></InProgress>
         <CompleteTask> </CompleteTask>
